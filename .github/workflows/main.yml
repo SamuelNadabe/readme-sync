@@ -1,0 +1,34 @@
+name: CI - Continuous Integration
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'scripts/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Baixar Código
+        uses: actions/checkout@v6
+
+      - name: Configurar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Automação do README
+        run: python scripts/sync_readme.py
+        env:
+          README_PATH: "README.md"
+      - name: Salvar README Manualmente
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs: auto-update README [skip ci]" || exit 0
+          git push
